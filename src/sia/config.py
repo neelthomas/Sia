@@ -1,5 +1,17 @@
 import os
 from dataclasses import dataclass
+from pathlib import Path
+
+
+def load_dotenv(path: Path = Path(".env")) -> None:
+    """Minimal .env reader: KEY=VALUE lines, existing environment variables win."""
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, _, value = line.partition("=")
+            os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
 @dataclass(frozen=True)
@@ -16,6 +28,7 @@ class Config:
 
     @classmethod
     def from_env(cls) -> "Config":
+        load_dotenv()
         key = os.environ.get("GEMINI_API_KEY")
         if not key:
             raise SystemExit("GEMINI_API_KEY is not set (see .env.example).")

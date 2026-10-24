@@ -51,3 +51,15 @@ def test_turn_exit_and_silence():
     assert not run_turn(b, lambda: b"wav", lambda p: None, log=lambda s: None)
     assert is_exit("quit")
     assert run_turn(FakeBackend(""), lambda: None, lambda p: None, log=lambda s: None)
+
+
+def test_load_dotenv(tmp_path, monkeypatch):
+    from sia.config import load_dotenv
+
+    monkeypatch.delenv("SIA_TEST_KEY", raising=False)
+    env = tmp_path / ".env"
+    env.write_text("# c\nSIA_TEST_KEY='abc'\n")
+    load_dotenv(env)
+    import os
+    assert os.environ["SIA_TEST_KEY"] == "abc"
+    monkeypatch.delenv("SIA_TEST_KEY")
